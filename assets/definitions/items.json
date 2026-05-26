@@ -1,0 +1,426 @@
+{
+  "_comment": "Veilborn item definitions. Add new items here — no code changes required.",
+  "_version": "1.0.0",
+
+  "oak_log": {
+    "name": "Oak Log",
+    "description": "A sturdy log from an oak tree. Essential for woodworking.",
+    "category": "material",
+    "subcategory": "wood",
+    "icon": "res://assets/icons/items/oak_log.png",
+    "stackable": true,
+    "max_stack": 64,
+    "weight": 2.0,
+    "value": 4,
+    "tags": ["wood", "craftable"]
+  },
+
+  "pine_log": {
+    "name": "Pine Log",
+    "description": "Lightweight pine wood. Burns well and smells of resin.",
+    "category": "material",
+    "subcategory": "wood",
+    "icon": "res://assets/icons/items/pine_log.png",
+    "stackable": true,
+    "max_stack": 64,
+    "weight": 1.8,
+    "value": 3,
+    "tags": ["wood", "craftable"]
+  },
+
+  "iron_ore": {
+    "name": "Iron Ore",
+    "description": "Raw iron ore. Must be smelted before use.",
+    "category": "material",
+    "subcategory": "ore",
+    "icon": "res://assets/icons/items/iron_ore.png",
+    "stackable": true,
+    "max_stack": 99,
+    "weight": 1.5,
+    "value": 8,
+    "tags": ["ore", "smeltable"]
+  },
+
+  "iron_ingot": {
+    "name": "Iron Ingot",
+    "description": "Refined iron. The backbone of smithing.",
+    "category": "material",
+    "subcategory": "ingot",
+    "icon": "res://assets/icons/items/iron_ingot.png",
+    "stackable": true,
+    "max_stack": 99,
+    "weight": 1.2,
+    "value": 18,
+    "tags": ["ingot", "craftable"]
+  },
+
+  "gold_ore": {
+    "name": "Gold Ore",
+    "description": "Gleaming gold ore from deep veins.",
+    "category": "material",
+    "subcategory": "ore",
+    "stackable": true,
+    "weight": 2.0,
+    "value": 35,
+    "tags": ["ore", "smeltable", "precious"]
+  },
+
+  "gold_ingot": {
+    "name": "Gold Ingot",
+    "description": "Pure refined gold. Highly valuable.",
+    "category": "material",
+    "subcategory": "ingot",
+    "stackable": true,
+    "weight": 1.8,
+    "value": 80,
+    "tags": ["ingot", "precious"]
+  },
+
+  "coal": {
+    "name": "Coal",
+    "description": "A chunk of coal. Useful as fuel for smelting.",
+    "category": "material",
+    "subcategory": "fuel",
+    "stackable": true,
+    "max_stack": 64,
+    "weight": 0.5,
+    "value": 3,
+    "tags": ["fuel", "ore"]
+  },
+
+  "mithril_ore": {
+    "name": "Mithril Ore",
+    "description": "A rare silvery ore with magical resonance. Requires expert mining.",
+    "category": "material",
+    "subcategory": "ore",
+    "stackable": true,
+    "weight": 1.0,
+    "value": 150,
+    "tags": ["ore", "rare", "magical"]
+  },
+
+  "iron_sword": {
+    "name": "Iron Sword",
+    "description": "A reliable iron longsword. Well-balanced for both attack and defense.",
+    "category": "weapon",
+    "subcategory": "sword",
+    "stackable": false,
+    "weight": 2.5,
+    "equip_slot": 5,
+    "stat_bonuses": {
+      "attack": 18,
+      "crit_chance": 0.04
+    },
+    "value": 85,
+    "lore": "Standard issue for the Ironmarch city guard.",
+    "tags": ["sword", "melee", "one_handed"]
+  },
+
+  "iron_shield": {
+    "name": "Iron Shield",
+    "description": "A sturdy iron shield. Reduces incoming damage significantly.",
+    "category": "weapon",
+    "subcategory": "shield",
+    "stackable": false,
+    "weight": 4.0,
+    "equip_slot": 6,
+    "stat_bonuses": {
+      "defense": 22,
+      "max_hp": 15
+    },
+    "value": 70,
+    "tags": ["shield", "off_hand"]
+  },
+
+  "iron_helmet": {
+    "name": "Iron Helmet",
+    "description": "A solid iron helmet that protects the head from blows.",
+    "category": "armor",
+    "subcategory": "helmet",
+    "stackable": false,
+    "weight": 3.0,
+    "equip_slot": 0,
+    "stat_bonuses": {
+      "defense": 14,
+      "max_hp": 10
+    },
+    "value": 65,
+    "tags": ["helmet", "heavy_armor"]
+  },
+
+  "iron_chestplate": {
+    "name": "Iron Chestplate",
+    "description": "Heavy iron plate covering the torso. Essential for frontline fighters.",
+    "category": "armor",
+    "subcategory": "chestplate",
+    "stackable": false,
+    "weight": 8.0,
+    "equip_slot": 1,
+    "stat_bonuses": {
+      "defense": 28,
+      "max_hp": 20,
+      "speed": -0.5
+    },
+    "value": 140,
+    "tags": ["chestplate", "heavy_armor"]
+  },
+
+  "iron_legs": {
+    "name": "Iron Greaves",
+    "description": "Iron leg protection. Heavy but reliable.",
+    "category": "armor",
+    "subcategory": "greaves",
+    "stackable": false,
+    "weight": 6.0,
+    "equip_slot": 2,
+    "stat_bonuses": {
+      "defense": 20,
+      "max_hp": 12
+    },
+    "value": 110,
+    "tags": ["greaves", "heavy_armor"]
+  },
+
+  "mithril_sword": {
+    "name": "Mithril Blade",
+    "description": "A razor-thin sword forged from legendary mithril. Unnaturally light.",
+    "category": "weapon",
+    "subcategory": "sword",
+    "stackable": false,
+    "weight": 1.2,
+    "equip_slot": 5,
+    "stat_bonuses": {
+      "attack": 38,
+      "crit_chance": 0.09,
+      "speed": 0.8
+    },
+    "value": 600,
+    "lore": "Mithril hums faintly with ancient dwarven runes.",
+    "tags": ["sword", "melee", "one_handed", "rare_material"]
+  },
+
+  "hunters_bow": {
+    "name": "Hunter's Bow",
+    "description": "A well-crafted recurve bow favored by rangers and scouts.",
+    "category": "weapon",
+    "subcategory": "bow",
+    "stackable": false,
+    "weight": 1.5,
+    "equip_slot": 7,
+    "stat_bonuses": {
+      "attack": 22,
+      "crit_chance": 0.07,
+      "dexterity": 2
+    },
+    "value": 120,
+    "tags": ["bow", "ranged"]
+  },
+
+  "wizard_staff": {
+    "name": "Apprentice Staff",
+    "description": "A gnarled staff tipped with a faintly glowing orb.",
+    "category": "weapon",
+    "subcategory": "staff",
+    "stackable": false,
+    "weight": 2.0,
+    "equip_slot": 5,
+    "stat_bonuses": {
+      "magic_power": 30,
+      "max_mana": 20,
+      "intelligence": 3
+    },
+    "value": 180,
+    "tags": ["staff", "melee", "two_handed", "magical"]
+  },
+
+  "health_potion": {
+    "name": "Health Potion",
+    "description": "A crimson vial that restores 50 HP when consumed.",
+    "category": "consumable",
+    "subcategory": "potion",
+    "stackable": true,
+    "max_stack": 20,
+    "weight": 0.3,
+    "value": 25,
+    "use_effect": "heal_50",
+    "tags": ["potion", "healing"]
+  },
+
+  "mana_potion": {
+    "name": "Mana Potion",
+    "description": "A sapphire-blue vial that restores 40 mana.",
+    "category": "consumable",
+    "subcategory": "potion",
+    "stackable": true,
+    "max_stack": 20,
+    "weight": 0.3,
+    "value": 30,
+    "use_effect": "restore_mana_40",
+    "tags": ["potion", "mana"]
+  },
+
+  "antidote": {
+    "name": "Antidote",
+    "description": "Cures poison and disease. Bitter to taste, lifesaving in effect.",
+    "category": "consumable",
+    "subcategory": "potion",
+    "stackable": true,
+    "max_stack": 10,
+    "weight": 0.2,
+    "value": 18,
+    "use_effect": "cure_poison",
+    "tags": ["potion", "cure"]
+  },
+
+  "cooked_meat": {
+    "name": "Roasted Meat",
+    "description": "Properly cooked meat. Restores stamina and provides a minor HP regen buff.",
+    "category": "consumable",
+    "subcategory": "food",
+    "stackable": true,
+    "max_stack": 10,
+    "weight": 0.4,
+    "value": 8,
+    "use_effect": "feed_stamina_regen",
+    "tags": ["food", "stamina"]
+  },
+
+  "wildroot": {
+    "name": "Wildroot",
+    "description": "A common herb used in basic alchemy. Slightly bitter smell.",
+    "category": "material",
+    "subcategory": "herb",
+    "stackable": true,
+    "max_stack": 64,
+    "weight": 0.1,
+    "value": 5,
+    "tags": ["herb", "alchemy"]
+  },
+
+  "moonpetal": {
+    "name": "Moonpetal",
+    "description": "A rare flower that blooms only at night. Prized by alchemists.",
+    "category": "material",
+    "subcategory": "herb",
+    "stackable": true,
+    "max_stack": 32,
+    "weight": 0.1,
+    "value": 25,
+    "tags": ["herb", "alchemy", "rare", "night"]
+  },
+
+  "firebloom": {
+    "name": "Firebloom",
+    "description": "A flame-red flower found near volcanic vents. Extremely hot to touch.",
+    "category": "material",
+    "subcategory": "herb",
+    "stackable": true,
+    "weight": 0.1,
+    "value": 35,
+    "tags": ["herb", "alchemy", "fire"]
+  },
+
+  "wolf_pelt": {
+    "name": "Wolf Pelt",
+    "description": "Thick fur from a forest wolf. Used in crafting warm gear.",
+    "category": "material",
+    "subcategory": "hide",
+    "stackable": true,
+    "max_stack": 16,
+    "weight": 1.5,
+    "value": 12,
+    "tags": ["hide", "tailoring"]
+  },
+
+  "dragon_scale": {
+    "name": "Dragon Scale",
+    "description": "Near-indestructible scale from a slain dragon. Legendary crafting material.",
+    "category": "material",
+    "subcategory": "exotic",
+    "stackable": true,
+    "max_stack": 5,
+    "weight": 3.0,
+    "value": 500,
+    "lore": "Hot to the touch even years after the dragon's death.",
+    "tags": ["exotic", "rare", "legendary_craft"]
+  },
+
+  "travelers_ring": {
+    "name": "Traveler's Ring",
+    "description": "A simple enchanted band that reduces fatigue from long journeys.",
+    "category": "accessory",
+    "subcategory": "ring",
+    "stackable": false,
+    "weight": 0.1,
+    "equip_slot": 9,
+    "stat_bonuses": {
+      "max_stamina": 20,
+      "dexterity": 1
+    },
+    "value": 90,
+    "tags": ["ring", "enchanted"]
+  },
+
+  "iron_amulet": {
+    "name": "Iron Amulet",
+    "description": "A simple iron amulet worn by common soldiers for good luck.",
+    "category": "accessory",
+    "subcategory": "necklace",
+    "stackable": false,
+    "weight": 0.2,
+    "equip_slot": 8,
+    "stat_bonuses": {
+      "defense": 5,
+      "max_hp": 8
+    },
+    "value": 55,
+    "tags": ["necklace"]
+  },
+
+  "explorer_map": {
+    "name": "Ancient Explorer's Map",
+    "description": "A weathered map marking the location of a lost dungeon. One use.",
+    "category": "quest",
+    "subcategory": "map",
+    "stackable": false,
+    "weight": 0.2,
+    "value": 200,
+    "use_effect": "reveal_dungeon_location",
+    "tags": ["quest", "map", "dungeon"]
+  },
+
+  "guild_charter": {
+    "name": "Guild Charter",
+    "description": "An official document granting rights to found a guild.",
+    "category": "quest",
+    "subcategory": "document",
+    "stackable": false,
+    "weight": 0.1,
+    "value": 500,
+    "tags": ["quest", "guild"]
+  },
+
+  "magmatite_core": {
+    "name": "Magmatite Core",
+    "description": "A volcanic ore that burns with inner heat. Rare and highly sought.",
+    "category": "material",
+    "subcategory": "exotic_ore",
+    "stackable": true,
+    "max_stack": 10,
+    "weight": 2.5,
+    "value": 220,
+    "tags": ["ore", "fire", "rare", "volcanic"]
+  },
+
+  "frostite_shard": {
+    "name": "Frostite Shard",
+    "description": "A crystalline fragment from the deep tundra. Radiates cold.",
+    "category": "material",
+    "subcategory": "exotic_ore",
+    "stackable": true,
+    "max_stack": 10,
+    "weight": 0.8,
+    "value": 180,
+    "tags": ["ore", "ice", "rare", "tundra"]
+  }
+}

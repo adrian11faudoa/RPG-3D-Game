@@ -1,0 +1,21 @@
+{
+  "id": "frostlands_expansion",
+  "name": "Frostlands Expansion",
+  "version": "1.0.0",
+  "author": "YourName",
+  "description": "Adds the Deep Glacier biome, frost weapons, and the Ancient Frost Wyrm boss.",
+  "dependencies": [],
+  "tags": ["biome", "creatures", "weapons", "boss"],
+  "scenes": [
+    {
+      "type": "creature",
+      "id":   "ancient_frost_wyrm",
+      "file": "scenes/ancient_frost_wyrm.tscn"
+    },
+    {
+      "type": "building",
+      "id":   "glacial_shrine",
+      "file": "scenes/glacial_shrine.tscn"
+    }
+  ]
+}

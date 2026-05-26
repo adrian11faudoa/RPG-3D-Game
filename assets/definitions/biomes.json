@@ -1,0 +1,351 @@
+{
+  "biome_registry": {
+    "version": "1.0.0",
+    "comment": "Biome definitions for Veilborn. Add new biomes here — no code changes needed."
+  },
+
+  "ocean": {
+    "display_name": "Abyssal Ocean",
+    "temperature_range": [-1.0, 1.0],
+    "humidity_range": [0.5, 1.0],
+    "surface_voxel": "sand",
+    "topsoil_voxel": "sand",
+    "topsoil_depth": 3,
+    "sky_color": [0.2, 0.4, 0.7],
+    "fog_color": [0.1, 0.3, 0.6],
+    "fog_density": 0.02,
+    "ambient_sounds": ["ocean_waves", "seagulls", "underwater_bubbles"],
+    "music_track": "ocean_theme",
+    "features": [],
+    "creature_spawns": [
+      {"id": "sea_serpent",   "weight": 5,  "min_depth": -20},
+      {"id": "giant_crab",    "weight": 15, "min_depth": -5},
+      {"id": "jellyfish",     "weight": 30, "min_depth": -10},
+      {"id": "deep_angler",   "weight": 3,  "min_depth": -50}
+    ],
+    "loot_table": "ocean_loot",
+    "danger_level": 3
+  },
+
+  "beach": {
+    "display_name": "Golden Shore",
+    "temperature_range": [-0.2, 1.0],
+    "humidity_range": [-0.2, 1.0],
+    "surface_voxel": "sand",
+    "topsoil_voxel": "sand",
+    "topsoil_depth": 4,
+    "sky_color": [0.6, 0.7, 0.9],
+    "fog_color": [0.6, 0.7, 0.8],
+    "fog_density": 0.005,
+    "ambient_sounds": ["gentle_waves", "seabirds"],
+    "music_track": "coastal_theme",
+    "features": [
+      {"type": "tree_palm",    "density": 0.015},
+      {"type": "rock_cluster", "density": 0.008}
+    ],
+    "creature_spawns": [
+      {"id": "beach_crab", "weight": 40},
+      {"id": "seagull",    "weight": 30},
+      {"id": "pirate_scout","weight": 5}
+    ],
+    "loot_table": "coastal_loot",
+    "danger_level": 1
+  },
+
+  "temperate_forest": {
+    "display_name": "Emerald Woodlands",
+    "temperature_range": [-0.1, 0.5],
+    "humidity_range": [0.0, 0.8],
+    "surface_voxel": "grass",
+    "topsoil_voxel": "dirt",
+    "topsoil_depth": 3,
+    "sky_color": [0.5, 0.7, 0.5],
+    "fog_color": [0.4, 0.6, 0.4],
+    "fog_density": 0.008,
+    "ambient_sounds": ["forest_birds", "rustling_leaves", "crickets_night"],
+    "music_track": "forest_theme",
+    "features": [
+      {"type": "tree_oak",     "density": 0.08},
+      {"type": "mushroom",     "density": 0.02},
+      {"type": "rock_cluster", "density": 0.005},
+      {"type": "ruins_small",  "density": 0.001}
+    ],
+    "creature_spawns": [
+      {"id": "forest_wolf",   "weight": 25},
+      {"id": "deer",          "weight": 40},
+      {"id": "giant_spider",  "weight": 10},
+      {"id": "wood_golem",    "weight": 5},
+      {"id": "bandit",        "weight": 8},
+      {"id": "fairy",         "weight": 3}
+    ],
+    "ores": ["coal", "iron", "copper"],
+    "loot_table": "forest_loot",
+    "danger_level": 2
+  },
+
+  "dark_forest": {
+    "display_name": "Shadowwood",
+    "temperature_range": [-0.3, 0.2],
+    "humidity_range": [0.3, 0.9],
+    "surface_voxel": "dark_grass",
+    "topsoil_voxel": "dark_dirt",
+    "topsoil_depth": 3,
+    "sky_color": [0.15, 0.1, 0.2],
+    "fog_color": [0.1, 0.05, 0.15],
+    "fog_density": 0.025,
+    "ambient_sounds": ["dark_forest_ambience", "owl", "distant_howl"],
+    "music_track": "shadowwood_theme",
+    "features": [
+      {"type": "tree_oak",    "density": 0.12},
+      {"type": "mushroom",    "density": 0.05},
+      {"type": "ruins_small", "density": 0.003},
+      {"type": "cursed_shrine","density":0.0005}
+    ],
+    "creature_spawns": [
+      {"id": "shadow_wolf",   "weight": 30},
+      {"id": "dark_elf",      "weight": 15},
+      {"id": "wight",         "weight": 10},
+      {"id": "giant_spider",  "weight": 20},
+      {"id": "treant",        "weight": 5}
+    ],
+    "ores": ["coal", "iron", "shadowite"],
+    "loot_table": "dark_forest_loot",
+    "danger_level": 5,
+    "special_rules": {
+      "reduced_visibility": 0.5,
+      "monsters_always_hostile": true
+    }
+  },
+
+  "plains": {
+    "display_name": "Sunlit Plains",
+    "temperature_range": [0.0, 0.7],
+    "humidity_range": [-0.5, 0.2],
+    "surface_voxel": "grass",
+    "topsoil_voxel": "dirt",
+    "topsoil_depth": 2,
+    "sky_color": [0.6, 0.75, 0.95],
+    "fog_color": [0.7, 0.8, 0.9],
+    "fog_density": 0.002,
+    "ambient_sounds": ["wind_plains", "grasshoppers", "distant_birds"],
+    "music_track": "plains_theme",
+    "features": [
+      {"type": "tree_oak",      "density": 0.01},
+      {"type": "rock_cluster",  "density": 0.008},
+      {"type": "ruins_small",   "density": 0.002},
+      {"type": "flower_patch",  "density": 0.03}
+    ],
+    "creature_spawns": [
+      {"id": "bison",         "weight": 35},
+      {"id": "prairie_wolf",  "weight": 20},
+      {"id": "giant_hawk",    "weight": 10},
+      {"id": "centaur",       "weight": 8},
+      {"id": "goblin_patrol", "weight": 12}
+    ],
+    "ores": ["coal", "iron", "copper"],
+    "loot_table": "plains_loot",
+    "danger_level": 2
+  },
+
+  "desert": {
+    "display_name": "Scorched Wastes",
+    "temperature_range": [0.5, 1.0],
+    "humidity_range": [-1.0, -0.3],
+    "surface_voxel": "sand",
+    "topsoil_voxel": "sandstone",
+    "topsoil_depth": 5,
+    "sky_color": [0.9, 0.7, 0.4],
+    "fog_color": [0.85, 0.7, 0.5],
+    "fog_density": 0.004,
+    "ambient_sounds": ["desert_wind", "sand_shifting", "distant_vultures"],
+    "music_track": "desert_theme",
+    "features": [
+      {"type": "cactus",       "density": 0.04},
+      {"type": "rock_cluster", "density": 0.012},
+      {"type": "ruins_small",  "density": 0.003},
+      {"type": "oasis",        "density": 0.0005}
+    ],
+    "creature_spawns": [
+      {"id": "scorpion",        "weight": 30},
+      {"id": "sand_wraith",     "weight": 15},
+      {"id": "desert_lion",     "weight": 10},
+      {"id": "mummy",           "weight": 8},
+      {"id": "giant_beetle",    "weight": 20},
+      {"id": "sandworm",        "weight": 3}
+    ],
+    "ores": ["gold", "copper", "desert_glass"],
+    "loot_table": "desert_loot",
+    "danger_level": 4,
+    "special_rules": {
+      "thirst_drain_multiplier": 2.0,
+      "heat_damage_day": true
+    }
+  },
+
+  "tundra": {
+    "display_name": "Frozen Tundra",
+    "temperature_range": [-1.0, -0.4],
+    "humidity_range": [-0.5, 0.3],
+    "surface_voxel": "snow",
+    "topsoil_voxel": "frozen_dirt",
+    "topsoil_depth": 2,
+    "sky_color": [0.7, 0.8, 0.95],
+    "fog_color": [0.8, 0.85, 0.95],
+    "fog_density": 0.012,
+    "ambient_sounds": ["arctic_wind", "blizzard_light", "ice_creak"],
+    "music_track": "tundra_theme",
+    "features": [
+      {"type": "tree_pine",     "density": 0.02},
+      {"type": "rock_cluster",  "density": 0.01},
+      {"type": "ice_spire",     "density": 0.004}
+    ],
+    "creature_spawns": [
+      {"id": "frost_wolf",       "weight": 25},
+      {"id": "polar_bear",       "weight": 15},
+      {"id": "ice_elemental",    "weight": 8},
+      {"id": "yeti",             "weight": 5},
+      {"id": "frost_giant",      "weight": 2}
+    ],
+    "ores": ["iron", "frostite", "silver"],
+    "loot_table": "tundra_loot",
+    "danger_level": 4,
+    "special_rules": {
+      "cold_damage_without_gear": true,
+      "blizzard_event_chance": 0.05
+    }
+  },
+
+  "alpine": {
+    "display_name": "Ironspire Mountains",
+    "temperature_range": [-0.6, 0.0],
+    "humidity_range": [-0.3, 0.5],
+    "surface_voxel": "snow",
+    "topsoil_voxel": "stone",
+    "topsoil_depth": 1,
+    "sky_color": [0.5, 0.65, 0.85],
+    "fog_color": [0.7, 0.75, 0.85],
+    "fog_density": 0.015,
+    "ambient_sounds": ["mountain_wind", "eagle_cry", "rockfall_distant"],
+    "music_track": "mountain_theme",
+    "features": [
+      {"type": "tree_pine",     "density": 0.015},
+      {"type": "rock_cluster",  "density": 0.03},
+      {"type": "ruins_small",   "density": 0.001}
+    ],
+    "creature_spawns": [
+      {"id": "mountain_goat",    "weight": 30},
+      {"id": "stone_troll",      "weight": 10},
+      {"id": "rock_elemental",   "weight": 8},
+      {"id": "wyvern",           "weight": 4},
+      {"id": "ice_harpy",        "weight": 10},
+      {"id": "dwarf_bandit",     "weight": 6}
+    ],
+    "ores": ["iron", "silver", "mithril", "gold"],
+    "loot_table": "mountain_loot",
+    "danger_level": 5
+  },
+
+  "swamp": {
+    "display_name": "Thornmire Bog",
+    "temperature_range": [0.1, 0.6],
+    "humidity_range": [0.6, 1.0],
+    "surface_voxel": "mud",
+    "topsoil_voxel": "peat",
+    "topsoil_depth": 4,
+    "sky_color": [0.3, 0.4, 0.3],
+    "fog_color": [0.25, 0.35, 0.25],
+    "fog_density": 0.03,
+    "ambient_sounds": ["swamp_frogs", "bubbling_mud", "swamp_insects"],
+    "music_track": "swamp_theme",
+    "features": [
+      {"type": "mushroom",      "density": 0.06},
+      {"type": "tree_oak",      "density": 0.04},
+      {"type": "ruins_small",   "density": 0.002},
+      {"type": "bog_body",      "density": 0.001}
+    ],
+    "creature_spawns": [
+      {"id": "bog_witch",        "weight": 8},
+      {"id": "giant_frog",       "weight": 25},
+      {"id": "lizardfolk",       "weight": 15},
+      {"id": "will_o_wisp",      "weight": 10},
+      {"id": "swamp_serpent",    "weight": 8},
+      {"id": "zombie",           "weight": 15}
+    ],
+    "ores": ["coal", "iron"],
+    "loot_table": "swamp_loot",
+    "danger_level": 4,
+    "special_rules": {
+      "poison_hazard_zones": true,
+      "reduced_movement_speed": 0.7
+    }
+  },
+
+  "volcanic": {
+    "display_name": "Ashfire Caldera",
+    "temperature_range": [0.8, 1.0],
+    "humidity_range": [-1.0, -0.5],
+    "surface_voxel": "obsidian",
+    "topsoil_voxel": "basalt",
+    "topsoil_depth": 2,
+    "sky_color": [0.5, 0.2, 0.1],
+    "fog_color": [0.4, 0.15, 0.05],
+    "fog_density": 0.02,
+    "ambient_sounds": ["lava_bubbling", "volcanic_rumble", "ash_wind"],
+    "music_track": "volcanic_theme",
+    "features": [
+      {"type": "lava_vent",     "density": 0.008},
+      {"type": "obsidian_spire","density": 0.005},
+      {"type": "ruins_small",   "density": 0.001}
+    ],
+    "creature_spawns": [
+      {"id": "fire_elemental",   "weight": 20},
+      {"id": "magma_golem",      "weight": 10},
+      {"id": "ash_wraith",       "weight": 15},
+      {"id": "salamander",       "weight": 25},
+      {"id": "lava_drake",       "weight": 5}
+    ],
+    "ores": ["iron", "gold", "magmatite", "obsidian"],
+    "loot_table": "volcanic_loot",
+    "danger_level": 7,
+    "special_rules": {
+      "fire_damage_without_gear": true,
+      "lava_instant_kill": true
+    }
+  },
+
+  "magic_forest": {
+    "display_name": "Whisperwood",
+    "temperature_range": [0.1, 0.5],
+    "humidity_range": [0.2, 0.7],
+    "surface_voxel": "enchanted_grass",
+    "topsoil_voxel": "arcane_dirt",
+    "topsoil_depth": 3,
+    "sky_color": [0.5, 0.3, 0.7],
+    "fog_color": [0.4, 0.2, 0.6],
+    "fog_density": 0.018,
+    "ambient_sounds": ["magical_chimes", "ethereal_whispers", "fairy_wings"],
+    "music_track": "magic_forest_theme",
+    "features": [
+      {"type": "tree_oak",       "density": 0.07},
+      {"type": "mushroom",       "density": 0.04},
+      {"type": "mana_crystal",   "density": 0.01},
+      {"type": "fairy_ring",     "density": 0.005},
+      {"type": "ruins_small",    "density": 0.002}
+    ],
+    "creature_spawns": [
+      {"id": "fairy",            "weight": 25},
+      {"id": "unicorn",          "weight": 5},
+      {"id": "arcane_wolf",      "weight": 15},
+      {"id": "dryad",            "weight": 10},
+      {"id": "forest_spirit",    "weight": 8},
+      {"id": "corrupted_elf",    "weight": 10}
+    ],
+    "ores": ["iron", "moonshard", "starcrystal"],
+    "loot_table": "magic_forest_loot",
+    "danger_level": 4,
+    "special_rules": {
+      "mana_regen_bonus": 2.0,
+      "magic_damage_bonus": 1.5
+    }
+  }
+}

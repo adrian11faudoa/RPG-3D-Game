@@ -1,0 +1,328 @@
+{
+  "_comment": "Veilborn crafting recipe definitions. Data-driven — no code changes to add recipes.",
+  "_version": "1.0.0",
+
+  "smelt_iron_ingot": {
+    "name": "Smelt Iron Ingot",
+    "category": "smithing",
+    "icon": "res://assets/icons/recipes/iron_ingot.png",
+    "ingredients": [
+      {"item_id": "iron_ore", "amount": 2},
+      {"item_id": "coal",     "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "iron_ingot", "amount": 1}
+    ],
+    "craft_time": 8.0,
+    "workstation": "forge",
+    "required_skill": "smithing",
+    "required_level": 1,
+    "xp_reward": 15
+  },
+
+  "smelt_gold_ingot": {
+    "name": "Smelt Gold Ingot",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "gold_ore", "amount": 2},
+      {"item_id": "coal",     "amount": 2}
+    ],
+    "outputs": [
+      {"item_id": "gold_ingot", "amount": 1}
+    ],
+    "craft_time": 12.0,
+    "workstation": "forge",
+    "required_skill": "smithing",
+    "required_level": 3,
+    "xp_reward": 35
+  },
+
+  "craft_iron_sword": {
+    "name": "Forge Iron Sword",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "iron_ingot", "amount": 3},
+      {"item_id": "oak_log",    "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "iron_sword", "amount": 1}
+    ],
+    "craft_time": 15.0,
+    "workstation": "forge",
+    "required_skill": "smithing",
+    "required_level": 2,
+    "xp_reward": 45
+  },
+
+  "craft_iron_helmet": {
+    "name": "Forge Iron Helmet",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "iron_ingot", "amount": 4}
+    ],
+    "outputs": [
+      {"item_id": "iron_helmet", "amount": 1}
+    ],
+    "craft_time": 18.0,
+    "workstation": "forge",
+    "required_skill": "smithing",
+    "required_level": 2,
+    "xp_reward": 50
+  },
+
+  "craft_iron_chestplate": {
+    "name": "Forge Iron Chestplate",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "iron_ingot", "amount": 8}
+    ],
+    "outputs": [
+      {"item_id": "iron_chestplate", "amount": 1}
+    ],
+    "craft_time": 25.0,
+    "workstation": "forge",
+    "required_skill": "smithing",
+    "required_level": 3,
+    "xp_reward": 80
+  },
+
+  "craft_iron_shield": {
+    "name": "Forge Iron Shield",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "iron_ingot", "amount": 5},
+      {"item_id": "oak_log",    "amount": 2}
+    ],
+    "outputs": [
+      {"item_id": "iron_shield", "amount": 1}
+    ],
+    "craft_time": 20.0,
+    "workstation": "forge",
+    "required_skill": "smithing",
+    "required_level": 2,
+    "xp_reward": 60
+  },
+
+  "craft_mithril_sword": {
+    "name": "Forge Mithril Blade",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "mithril_ore",  "amount": 4},
+      {"item_id": "gold_ingot",   "amount": 1},
+      {"item_id": "dragon_scale", "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "mithril_sword", "amount": 1}
+    ],
+    "craft_time": 60.0,
+    "workstation": "master_forge",
+    "required_skill": "smithing",
+    "required_level": 8,
+    "xp_reward": 500
+  },
+
+  "craft_hunters_bow": {
+    "name": "Craft Hunter's Bow",
+    "category": "woodworking",
+    "ingredients": [
+      {"item_id": "pine_log",  "amount": 3},
+      {"item_id": "wolf_pelt", "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "hunters_bow", "amount": 1}
+    ],
+    "craft_time": 12.0,
+    "workstation": "workbench",
+    "required_skill": "woodcutting",
+    "required_level": 3,
+    "xp_reward": 60
+  },
+
+  "brew_health_potion": {
+    "name": "Brew Health Potion",
+    "category": "alchemy",
+    "ingredients": [
+      {"item_id": "wildroot",   "amount": 2},
+      {"item_id": "moonpetal",  "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "health_potion", "amount": 2}
+    ],
+    "craft_time": 6.0,
+    "workstation": "alchemy_table",
+    "required_skill": "alchemy",
+    "required_level": 1,
+    "xp_reward": 20
+  },
+
+  "brew_mana_potion": {
+    "name": "Brew Mana Potion",
+    "category": "alchemy",
+    "ingredients": [
+      {"item_id": "moonpetal",  "amount": 2},
+      {"item_id": "wildroot",   "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "mana_potion", "amount": 2}
+    ],
+    "craft_time": 7.0,
+    "workstation": "alchemy_table",
+    "required_skill": "alchemy",
+    "required_level": 2,
+    "xp_reward": 25
+  },
+
+  "brew_antidote": {
+    "name": "Brew Antidote",
+    "category": "alchemy",
+    "ingredients": [
+      {"item_id": "wildroot",   "amount": 3},
+      {"item_id": "firebloom",  "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "antidote", "amount": 2}
+    ],
+    "craft_time": 5.0,
+    "workstation": "alchemy_table",
+    "required_skill": "alchemy",
+    "required_level": 1,
+    "xp_reward": 18
+  },
+
+  "cook_meat": {
+    "name": "Roast Meat",
+    "category": "cooking",
+    "ingredients": [
+      {"item_id": "raw_meat",  "amount": 1},
+      {"item_id": "coal",      "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "cooked_meat", "amount": 1}
+    ],
+    "craft_time": 3.0,
+    "workstation": "campfire",
+    "required_skill": "cooking",
+    "required_level": 0,
+    "xp_reward": 8
+  },
+
+  "plank_from_oak": {
+    "name": "Cut Oak Planks",
+    "category": "woodworking",
+    "ingredients": [
+      {"item_id": "oak_log", "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "oak_plank", "amount": 4}
+    ],
+    "craft_time": 2.0,
+    "workstation": "workbench",
+    "required_skill": "woodcutting",
+    "required_level": 0,
+    "xp_reward": 5
+  },
+
+  "craft_chest": {
+    "name": "Build Storage Chest",
+    "category": "woodworking",
+    "ingredients": [
+      {"item_id": "oak_plank",  "amount": 8},
+      {"item_id": "iron_ingot", "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "storage_chest", "amount": 1}
+    ],
+    "craft_time": 10.0,
+    "workstation": "workbench",
+    "required_skill": "woodcutting",
+    "required_level": 2,
+    "xp_reward": 30
+  },
+
+  "craft_campfire": {
+    "name": "Build Campfire",
+    "category": "survival",
+    "ingredients": [
+      {"item_id": "oak_log", "amount": 3},
+      {"item_id": "coal",    "amount": 2}
+    ],
+    "outputs": [
+      {"item_id": "campfire_kit", "amount": 1}
+    ],
+    "craft_time": 3.0,
+    "workstation": "",
+    "required_skill": "",
+    "required_level": 0,
+    "xp_reward": 10
+  },
+
+  "craft_staff": {
+    "name": "Craft Apprentice Staff",
+    "category": "woodworking",
+    "ingredients": [
+      {"item_id": "oak_log",    "amount": 2},
+      {"item_id": "moonpetal",  "amount": 3},
+      {"item_id": "iron_ingot", "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "wizard_staff", "amount": 1}
+    ],
+    "craft_time": 20.0,
+    "workstation": "enchanting_table",
+    "required_skill": "alchemy",
+    "required_level": 3,
+    "xp_reward": 120
+  },
+
+  "craft_travelers_ring": {
+    "name": "Forge Traveler's Ring",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "gold_ingot",  "amount": 2},
+      {"item_id": "moonpetal",   "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "travelers_ring", "amount": 1}
+    ],
+    "craft_time": 15.0,
+    "workstation": "enchanting_table",
+    "required_skill": "smithing",
+    "required_level": 4,
+    "xp_reward": 90
+  },
+
+  "smelt_frostite": {
+    "name": "Refine Frostite",
+    "category": "smithing",
+    "ingredients": [
+      {"item_id": "frostite_shard", "amount": 3},
+      {"item_id": "iron_ingot",     "amount": 1}
+    ],
+    "outputs": [
+      {"item_id": "frostite_ingot", "amount": 1}
+    ],
+    "craft_time": 20.0,
+    "workstation": "master_forge",
+    "required_skill": "smithing",
+    "required_level": 6,
+    "xp_reward": 180
+  },
+
+  "brew_strength_elixir": {
+    "name": "Brew Strength Elixir",
+    "category": "alchemy",
+    "ingredients": [
+      {"item_id": "firebloom",  "amount": 3},
+      {"item_id": "wolf_pelt",  "amount": 1},
+      {"item_id": "moonpetal",  "amount": 2}
+    ],
+    "outputs": [
+      {"item_id": "strength_elixir", "amount": 1}
+    ],
+    "craft_time": 20.0,
+    "workstation": "alchemy_table",
+    "required_skill": "alchemy",
+    "required_level": 5,
+    "xp_reward": 120
+  }
+}

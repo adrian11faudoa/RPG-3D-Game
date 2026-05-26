@@ -1,0 +1,345 @@
+{
+  "_comment": "Veilborn skill tree definitions. Prerequisites use skill IDs. tree_position is [x, y] in UI grid.",
+  "_version": "1.0.0",
+
+  "heavy_strike": {
+    "name": "Heavy Strike",
+    "description": "A powerful overhead blow. Increases base melee damage.",
+    "category": "combat",
+    "icon": "res://assets/icons/skills/heavy_strike.png",
+    "prerequisites": [],
+    "max_rank": 5,
+    "cost": 1,
+    "stat_bonuses": { "attack": 4 },
+    "tree_position": [0, 0]
+  },
+
+  "combo_master": {
+    "name": "Combo Master",
+    "description": "Extends the combo chain by 1 step per rank. Hit harder the longer the chain.",
+    "category": "combat",
+    "prerequisites": ["heavy_strike"],
+    "max_rank": 3,
+    "cost": 1,
+    "stat_bonuses": { "attack": 2 },
+    "ability_grant": "extended_combo",
+    "tree_position": [0, 1]
+  },
+
+  "parry_master": {
+    "name": "Parry Expert",
+    "description": "Extends the parry window by 0.05s per rank. Perfect parries restore stamina.",
+    "category": "combat",
+    "prerequisites": ["heavy_strike"],
+    "max_rank": 3,
+    "cost": 1,
+    "passive_effects": [{"type": "extend_parry_window", "value": 0.05}],
+    "tree_position": [1, 1]
+  },
+
+  "berserker_rage": {
+    "name": "Berserker's Rage",
+    "description": "Below 30% HP, attack speed and damage increase dramatically.",
+    "category": "combat",
+    "prerequisites": ["combo_master"],
+    "max_rank": 2,
+    "cost": 2,
+    "ability_grant": "berserker_rage_passive",
+    "tree_position": [0, 2]
+  },
+
+  "whirlwind": {
+    "name": "Whirlwind",
+    "description": "Spin attack hitting all enemies within 3m. Short cooldown.",
+    "category": "combat",
+    "prerequisites": ["combo_master"],
+    "max_rank": 3,
+    "cost": 2,
+    "stat_bonuses": { "attack": 3 },
+    "ability_grant": "whirlwind_attack",
+    "tree_position": [0, 3]
+  },
+
+  "shield_bash": {
+    "name": "Shield Bash",
+    "description": "Bash with your shield, staggering the target for 1.5s.",
+    "category": "combat",
+    "prerequisites": ["parry_master"],
+    "max_rank": 2,
+    "cost": 1,
+    "ability_grant": "shield_bash",
+    "tree_position": [1, 2]
+  },
+
+  "quick_reflexes": {
+    "name": "Quick Reflexes",
+    "description": "Reduce dodge cooldown and increase i-frame duration.",
+    "category": "combat",
+    "prerequisites": [],
+    "max_rank": 4,
+    "cost": 1,
+    "stat_bonuses": { "dexterity": 2 },
+    "passive_effects": [{"type": "reduce_dodge_cooldown", "value": 0.1}],
+    "tree_position": [2, 0]
+  },
+
+  "dual_wield": {
+    "name": "Dual Wield",
+    "description": "Equip a one-handed weapon in the off-hand. Off-hand deals 65% damage.",
+    "category": "combat",
+    "prerequisites": ["quick_reflexes"],
+    "max_rank": 1,
+    "cost": 3,
+    "ability_grant": "dual_wield_passive",
+    "tree_position": [2, 1]
+  },
+
+  "fireball": {
+    "name": "Fireball",
+    "description": "Conjure a ball of flame that explodes on impact. Deals fire damage in an area.",
+    "category": "magic",
+    "prerequisites": [],
+    "max_rank": 5,
+    "cost": 1,
+    "stat_bonuses": { "magic_power": 5 },
+    "ability_grant": "fireball_cast",
+    "tree_position": [4, 0]
+  },
+
+  "frost_nova": {
+    "name": "Frost Nova",
+    "description": "Freeze all nearby enemies solid for 2 seconds. Frozen targets take 50% more damage.",
+    "category": "magic",
+    "prerequisites": ["fireball"],
+    "max_rank": 3,
+    "cost": 2,
+    "stat_bonuses": { "intelligence": 2 },
+    "ability_grant": "frost_nova_cast",
+    "tree_position": [4, 1]
+  },
+
+  "arcane_shield": {
+    "name": "Arcane Shield",
+    "description": "A barrier of magic absorbs damage. Breaks after absorbing enough hits.",
+    "category": "magic",
+    "prerequisites": ["fireball"],
+    "max_rank": 3,
+    "cost": 2,
+    "stat_bonuses": { "max_mana": 10 },
+    "ability_grant": "arcane_shield_cast",
+    "tree_position": [5, 1]
+  },
+
+  "chain_lightning": {
+    "name": "Chain Lightning",
+    "description": "A bolt that jumps between up to 5 nearby enemies. Stuns briefly.",
+    "category": "magic",
+    "prerequisites": ["frost_nova"],
+    "max_rank": 3,
+    "cost": 2,
+    "stat_bonuses": { "magic_power": 8 },
+    "ability_grant": "chain_lightning_cast",
+    "tree_position": [4, 2]
+  },
+
+  "mana_efficiency": {
+    "name": "Mana Efficiency",
+    "description": "Reduces mana cost of all spells by 5% per rank.",
+    "category": "magic",
+    "prerequisites": [],
+    "max_rank": 5,
+    "cost": 1,
+    "stat_bonuses": { "max_mana": 8 },
+    "passive_effects": [{"type": "reduce_spell_cost", "value": 0.05}],
+    "tree_position": [6, 0]
+  },
+
+  "summoning": {
+    "name": "Summon Familiar",
+    "description": "Summon a magical familiar to assist in combat. Type depends on mana invested.",
+    "category": "magic",
+    "prerequisites": ["mana_efficiency", "frost_nova"],
+    "max_rank": 3,
+    "cost": 3,
+    "ability_grant": "summon_familiar",
+    "tree_position": [5, 2]
+  },
+
+  "swift_shot": {
+    "name": "Swift Shot",
+    "description": "Fire an arrow with reduced draw time. No damage penalty.",
+    "category": "combat",
+    "prerequisites": [],
+    "max_rank": 3,
+    "cost": 1,
+    "stat_bonuses": { "dexterity": 2 },
+    "ability_grant": "swift_shot",
+    "tree_position": [3, 0]
+  },
+
+  "piercing_arrow": {
+    "name": "Piercing Arrow",
+    "description": "Your arrow passes through multiple enemies in a line.",
+    "category": "combat",
+    "prerequisites": ["swift_shot"],
+    "max_rank": 2,
+    "cost": 2,
+    "ability_grant": "piercing_shot",
+    "tree_position": [3, 1]
+  },
+
+  "trap_mastery": {
+    "name": "Trap Mastery",
+    "description": "Place caltrops, snares, or explosive traps. More ranks unlock new trap types.",
+    "category": "survival",
+    "prerequisites": ["swift_shot"],
+    "max_rank": 3,
+    "cost": 2,
+    "ability_grant": "place_trap",
+    "tree_position": [3, 2]
+  },
+
+  "mining": {
+    "name": "Mining",
+    "description": "Improves mining yield and unlocks access to deeper ore veins.",
+    "category": "crafting",
+    "prerequisites": [],
+    "max_rank": 10,
+    "cost": 1,
+    "passive_effects": [{"type": "gathering_bonus", "resource": "ore", "value": 0.15}],
+    "tree_position": [0, 5]
+  },
+
+  "woodcutting": {
+    "name": "Woodcutting",
+    "description": "Increases log yield and unlocks rare wood types.",
+    "category": "crafting",
+    "prerequisites": [],
+    "max_rank": 10,
+    "cost": 1,
+    "passive_effects": [{"type": "gathering_bonus", "resource": "wood", "value": 0.15}],
+    "tree_position": [1, 5]
+  },
+
+  "smithing": {
+    "name": "Smithing",
+    "description": "Improves quality rolls when forging weapons and armor.",
+    "category": "crafting",
+    "prerequisites": ["mining"],
+    "max_rank": 10,
+    "cost": 1,
+    "passive_effects": [{"type": "craft_quality_bonus", "category": "smithing", "value": 0.1}],
+    "tree_position": [0, 6]
+  },
+
+  "alchemy": {
+    "name": "Alchemy",
+    "description": "Brew more potent potions. Higher ranks unlock legendary recipes.",
+    "category": "crafting",
+    "prerequisites": [],
+    "max_rank": 10,
+    "cost": 1,
+    "passive_effects": [{"type": "craft_quality_bonus", "category": "alchemy", "value": 0.1}],
+    "tree_position": [2, 5]
+  },
+
+  "cooking": {
+    "name": "Cooking",
+    "description": "Prepare food that provides powerful, lasting buffs.",
+    "category": "crafting",
+    "prerequisites": [],
+    "max_rank": 5,
+    "cost": 1,
+    "passive_effects": [{"type": "food_buff_duration", "value": 0.2}],
+    "tree_position": [3, 5]
+  },
+
+  "toughness": {
+    "name": "Toughness",
+    "description": "Increases maximum HP significantly.",
+    "category": "survival",
+    "prerequisites": [],
+    "max_rank": 5,
+    "cost": 1,
+    "stat_bonuses": { "endurance": 3, "max_hp": 15 },
+    "tree_position": [5, 5]
+  },
+
+  "second_wind": {
+    "name": "Second Wind",
+    "description": "Once per encounter, automatically recover 25% HP when you would die.",
+    "category": "survival",
+    "prerequisites": ["toughness"],
+    "max_rank": 1,
+    "cost": 3,
+    "ability_grant": "second_wind_passive",
+    "tree_position": [5, 6]
+  },
+
+  "mountaineer": {
+    "name": "Mountaineer",
+    "description": "Reduces stamina drain while climbing. Higher ranks enable wall-walking.",
+    "category": "exploration",
+    "prerequisites": [],
+    "max_rank": 3,
+    "cost": 1,
+    "passive_effects": [{"type": "reduce_climb_drain", "value": 0.2}],
+    "tree_position": [7, 0]
+  },
+
+  "deep_diver": {
+    "name": "Deep Diver",
+    "description": "Increases swim speed and underwater breath duration.",
+    "category": "exploration",
+    "prerequisites": [],
+    "max_rank": 3,
+    "cost": 1,
+    "stat_bonuses": { "endurance": 1 },
+    "passive_effects": [{"type": "swim_speed_bonus", "value": 0.2}],
+    "tree_position": [7, 1]
+  },
+
+  "cartography": {
+    "name": "Cartography",
+    "description": "Reveals more of the minimap as you explore. Marks points of interest automatically.",
+    "category": "exploration",
+    "prerequisites": [],
+    "max_rank": 3,
+    "cost": 1,
+    "passive_effects": [{"type": "map_reveal_radius", "value": 1.5}],
+    "tree_position": [8, 0]
+  },
+
+  "treasure_hunter": {
+    "name": "Treasure Hunter",
+    "description": "Increases loot quality and gold drops from all sources.",
+    "category": "exploration",
+    "prerequisites": ["cartography"],
+    "max_rank": 5,
+    "cost": 2,
+    "passive_effects": [{"type": "loot_luck_bonus", "value": 0.1}],
+    "tree_position": [8, 1]
+  },
+
+  "blink": {
+    "name": "Blink",
+    "description": "Instantly teleport up to 8m in the direction you're facing. Short cooldown.",
+    "category": "magic",
+    "prerequisites": ["arcane_shield", "quick_reflexes"],
+    "max_rank": 2,
+    "cost": 3,
+    "ability_grant": "blink_cast",
+    "tree_position": [6, 2]
+  },
+
+  "dragon_skin": {
+    "name": "Dragonhide",
+    "description": "Ancient technique that briefly hardens your skin. Reduces all damage taken.",
+    "category": "survival",
+    "prerequisites": ["toughness", "second_wind"],
+    "max_rank": 2,
+    "cost": 4,
+    "ability_grant": "dragonhide_cast",
+    "tree_position": [5, 7]
+  }
+}
