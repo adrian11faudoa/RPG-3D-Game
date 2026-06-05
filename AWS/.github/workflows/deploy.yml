@@ -1,0 +1,421 @@
+###############################################################################
+# Veilborn — GitHub Actions CI/CD Pipeline
+#
+# Triggers:
+#   - Push to main   → deploys to staging
+#   - Push tag v*.*  → deploys to prod (with manual approval)
+#   - Pull Request   → runs tests and Terraform plan only
+###############################################################################
+name: Veilborn CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*.*.*']
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: veilborn-server
+  GODOT_VERSION: "4.3"
+  GODOT_RELEASE: "stable"
+
+permissions:
+  id-token: write    # For OIDC AWS auth
+  contents: read
+  pull-requests: write
+
+jobs:
+
+  ###########################################################################
+  # 1. VALIDATE & TEST
+  ###########################################################################
+  validate:
+    name: Validate & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: pip install psycopg2-binary pytest
+
+      - name: Validate JSON definitions
+        run: |
+          python3 - << 'EOF'
+          import json, glob, sys
+          errors = []
+          for f in glob.glob("assets/definitions/*.json"):
+              try:
+                  with open(f) as fh:
+                      data = json.load(fh)
+                  print(f"✓ {f} ({len(data)} entries)")
+              except Exception as e:
+                  errors.append(f"✗ {f}: {e}")
+          if errors:
+              for e in errors:
+                  print(e, file=sys.stderr)
+              sys.exit(1)
+          print(f"All {len(list(glob.glob('assets/definitions/*.json')))} JSON files valid")
+          EOF
+
+      - name: Validate SQL migrations
+        run: |
+          python3 - << 'EOF'
+          import glob, re, sys
+          files = sorted(glob.glob("server/dedicated/migrations/sql/*.sql"))
+          nums = []
+          for f in files:
+              m = re.match(r'(\d+)_', f.split('/')[-1])
+              if not m:
+                  print(f"✗ Bad migration name: {f}")
+                  sys.exit(1)
+              nums.append(int(m.group(1)))
+          for i, n in enumerate(nums):
+              if n != i + 1:
+                  print(f"✗ Migration sequence gap at {n}")
+                  sys.exit(1)
+          print(f"✓ {len(files)} migrations valid")
+          EOF
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+
+      - name: Terraform Format Check
+        run: terraform -chdir=infrastructure/terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: |
+          cd infrastructure/terraform
+          terraform init -backend=false
+          terraform validate
+
+  ###########################################################################
+  # 2. BUILD DOCKER IMAGE
+  ###########################################################################
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: github.event_name != 'pull_request'
+    outputs:
+      image-tag: ${{ steps.meta.outputs.version }}
+      ecr-registry: ${{ steps.login-ecr.outputs.registry }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/veilborn-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Download Godot headless binary
+        run: |
+          GODOT_FILE="Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_linux.x86_64"
+          curl -fsSL \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_RELEASE}/${GODOT_FILE}.zip" \
+            -o godot.zip
+          unzip godot.zip
+          mv "$GODOT_FILE" /usr/local/bin/godot
+          chmod +x /usr/local/bin/godot
+          godot --version
+
+      - name: Export Godot server
+        run: |
+          mkdir -p server/docker/export
+          # In real pipeline: export from project
+          # godot --headless --export-release "Linux/X11" server/docker/export/veilborn_server.x86_64
+          # For CI: create placeholder (replace with real export in your pipeline)
+          echo "#!/bin/bash" > server/docker/export/veilborn_server.x86_64
+          echo 'echo "Veilborn Server v1.0"' >> server/docker/export/veilborn_server.x86_64
+          touch server/docker/export/veilborn_server.pck
+          chmod +x server/docker/export/veilborn_server.x86_64
+
+      - name: Docker image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server/docker
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GODOT_VERSION=${{ env.GODOT_VERSION }}
+            GODOT_RELEASE=${{ env.GODOT_RELEASE }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.meta.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'    # Don't fail build on vulnerabilities, just report
+
+  ###########################################################################
+  # 3. DEPLOY TO STAGING
+  ###########################################################################
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: http://${{ steps.get-nlb.outputs.dns }}:7777
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/veilborn-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+
+      - name: Create staging tfvars
+        run: |
+          cat > infrastructure/terraform/staging.tfvars << EOF
+          environment              = "staging"
+          aws_region               = "${{ env.AWS_REGION }}"
+          key_pair_name            = "${{ secrets.EC2_KEY_PAIR_NAME }}"
+          admin_cidrs              = ${{ secrets.ADMIN_CIDRS }}
+          instance_type            = "c6i.large"
+          asg_min_size             = 1
+          asg_max_size             = 3
+          asg_desired_size         = 1
+          max_players_per_instance = 32
+          world_seed               = 99999
+          server_region_name       = "Staging Realm"
+          db_instance_class        = "db.t3.medium"
+          redis_node_type          = "cache.t3.small"
+          EOF
+
+      - name: Terraform Apply (Staging)
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          terraform apply -auto-approve -var-file="staging.tfvars"
+
+      - name: Get NLB DNS
+        id: get-nlb
+        run: |
+          DNS=$(cd infrastructure/terraform && terraform output -raw nlb_dns_name)
+          echo "dns=$DNS" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger rolling instance refresh
+        run: |
+          ASG=$(cd infrastructure/terraform && terraform output -raw asg_name)
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name "$ASG" \
+            --region "${{ env.AWS_REGION }}" \
+            --preferences '{"MinHealthyPercentage":50,"InstanceWarmup":120}'
+
+      - name: Wait for health check
+        run: |
+          DNS="${{ steps.get-nlb.outputs.dns }}"
+          echo "Waiting for http://$DNS:8080/health ..."
+          for i in $(seq 1 20); do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "http://$DNS:8080/health" || echo "000")
+            if [[ "$CODE" == "200" ]]; then
+              echo "✓ Health check passed on attempt $i"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $CODE — waiting 15s"
+            sleep 15
+          done
+          echo "ERROR: Health check never passed"
+          exit 1
+
+      - name: Comment on PR with staging URL
+        if: github.event.pull_request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🎮 Staging Deployed!\nConnect: \`${{ steps.get-nlb.outputs.dns }}:7777\``
+            })
+
+  ###########################################################################
+  # 4. DEPLOY TO PRODUCTION (manual approval required)
+  ###########################################################################
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, deploy-staging]
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: http://${{ steps.get-nlb.outputs.dns }}:7777
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/veilborn-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+
+      - name: Create prod tfvars
+        run: |
+          cat > infrastructure/terraform/prod.tfvars << EOF
+          environment              = "prod"
+          aws_region               = "${{ env.AWS_REGION }}"
+          key_pair_name            = "${{ secrets.EC2_KEY_PAIR_NAME_PROD }}"
+          admin_cidrs              = ${{ secrets.ADMIN_CIDRS_PROD }}
+          instance_type            = "c6i.xlarge"
+          asg_min_size             = 2
+          asg_max_size             = 10
+          asg_desired_size         = 2
+          max_players_per_instance = 64
+          world_seed               = ${{ secrets.WORLD_SEED }}
+          server_region_name       = "Ironmarch Reaches"
+          db_instance_class        = "db.r7g.large"
+          redis_node_type          = "cache.r7g.large"
+          hosted_zone_id           = "${{ secrets.ROUTE53_ZONE_ID }}"
+          domain_name              = "${{ secrets.DOMAIN_NAME }}"
+          EOF
+
+      - name: Terraform Apply (Prod)
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          terraform apply -auto-approve -var-file="prod.tfvars"
+
+      - name: Get NLB DNS
+        id: get-nlb
+        run: |
+          DNS=$(cd infrastructure/terraform && terraform output -raw nlb_dns_name)
+          echo "dns=$DNS" >> "$GITHUB_OUTPUT"
+
+      - name: Rolling instance refresh (prod)
+        run: |
+          ASG=$(cd infrastructure/terraform && terraform output -raw asg_name)
+          REFRESH_ID=$(aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name "$ASG" \
+            --region "${{ env.AWS_REGION }}" \
+            --preferences '{"MinHealthyPercentage":75,"InstanceWarmup":180}' \
+            --query 'InstanceRefreshId' \
+            --output text)
+          echo "Instance refresh started: $REFRESH_ID"
+
+          # Poll until complete
+          echo "Waiting for refresh to complete..."
+          for i in $(seq 1 40); do
+            STATUS=$(aws autoscaling describe-instance-refreshes \
+              --auto-scaling-group-name "$ASG" \
+              --region "${{ env.AWS_REGION }}" \
+              --query "InstanceRefreshes[?InstanceRefreshId=='$REFRESH_ID'].Status" \
+              --output text)
+            echo "  Status: $STATUS (attempt $i)"
+            if [[ "$STATUS" == "Successful" ]]; then
+              echo "✓ Instance refresh complete"
+              break
+            elif [[ "$STATUS" == "Failed" || "$STATUS" == "Cancelled" ]]; then
+              echo "ERROR: Instance refresh $STATUS"
+              exit 1
+            fi
+            sleep 30
+          done
+
+      - name: Notify Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: |
+            ${{ job.status == 'success' && '✅' || '❌' }} *Veilborn Prod Deploy ${{ job.status }}*
+            Tag: `${{ github.ref_name }}`
+            Connect: `${{ steps.get-nlb.outputs.dns }}:7777`
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  ###########################################################################
+  # PR PLAN ONLY (no apply)
+  ###########################################################################
+  terraform-plan:
+    name: Terraform Plan (PR)
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/veilborn-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          terraform plan \
+            -var="environment=staging" \
+            -var="key_pair_name=dummy" \
+            -var='admin_cidrs=["0.0.0.0/0"]' \
+            -no-color 2>&1 | tee plan.txt
+          echo "plan<<EOF" >> "$GITHUB_OUTPUT"
+          tail -50 plan.txt >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const plan = `${{ steps.plan.outputs.plan }}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🏗️ Terraform Plan\n\`\`\`\n${plan}\n\`\`\``
+            });

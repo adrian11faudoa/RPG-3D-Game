@@ -1,0 +1,260 @@
+###############################################################################
+# Veilborn — Docker Compose
+# 
+# Provides two profiles:
+#   dev:        Local game server + PostgreSQL + Redis (no AWS needed)
+#   monitoring: Prometheus + Grafana + exporters (for staging/prod monitoring)
+#
+# Usage:
+#   Local dev:
+#     docker compose --profile dev up
+#
+#   With monitoring:
+#     docker compose --profile dev --profile monitoring up
+#
+#   Monitoring only (for staging/prod):
+#     docker compose --profile monitoring up
+###############################################################################
+version: '3.9'
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+
+  ###########################################################################
+  # GAME SERVER (local dev)
+  ###########################################################################
+  game-server:
+    profiles: [dev]
+    build:
+      context: ./server/docker
+      dockerfile: Dockerfile
+      args:
+        GODOT_VERSION: "4.3"
+        GODOT_RELEASE: "stable"
+    image: veilborn-server:dev
+    container_name: veilborn-server
+    restart: unless-stopped
+    network_mode: host    # Required for UDP game traffic
+    environment:
+      VEILBORN_ENV: dev
+      VEILBORN_PORT: 7777
+      VEILBORN_ADMIN_PORT: 8080
+      VEILBORN_MAX_PLAYERS: 32
+      VEILBORN_WORLD_SEED: 42069
+      VEILBORN_REGION: "Dev Server"
+      VEILBORN_DATABASE_URL: "postgres://veilborn:devpassword@localhost:5432/veilborn?sslmode=disable"
+      VEILBORN_REDIS_URL: "redis://localhost:6379"
+      # No S3 in dev — use local storage
+    volumes:
+      - veilborn-data:/data
+      - veilborn-logs:/logs
+      - ./assets/mods:/data/mods:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  ###########################################################################
+  # POSTGRESQL (local dev)
+  ###########################################################################
+  postgres:
+    profiles: [dev]
+    image: postgres:16-alpine
+    container_name: veilborn-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: veilborn
+      POSTGRES_USER: veilborn
+      POSTGRES_PASSWORD: devpassword
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./server/dedicated/migrations/sql:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veilborn -d veilborn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+
+  ###########################################################################
+  # REDIS (local dev)
+  ###########################################################################
+  redis:
+    profiles: [dev]
+    image: redis:7.2-alpine
+    container_name: veilborn-redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging: *default-logging
+
+  ###########################################################################
+  # PROMETHEUS
+  ###########################################################################
+  prometheus:
+    profiles: [monitoring]
+    image: prom/prometheus:v2.48.1
+    container_name: veilborn-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts:/etc/prometheus/alerts:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+    logging: *default-logging
+
+  ###########################################################################
+  # GRAFANA
+  ###########################################################################
+  grafana:
+    profiles: [monitoring]
+    image: grafana/grafana:10.2.3
+    container_name: veilborn-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-veilborn_admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-piechart-panel"
+      GF_SERVER_ROOT_URL: "http://localhost:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    logging: *default-logging
+
+  ###########################################################################
+  # ALERTMANAGER
+  ###########################################################################
+  alertmanager:
+    profiles: [monitoring]
+    image: prom/alertmanager:v0.26.0
+    container_name: veilborn-alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/config.yml:ro
+      - alertmanager-data:/alertmanager
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring
+    logging: *default-logging
+
+  ###########################################################################
+  # NODE EXPORTER (system metrics from game servers)
+  ###########################################################################
+  node-exporter:
+    profiles: [dev, monitoring]
+    image: prom/node-exporter:v1.7.0
+    container_name: veilborn-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker)($$|/)'
+    network_mode: host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    logging: *default-logging
+
+  ###########################################################################
+  # REDIS EXPORTER
+  ###########################################################################
+  redis-exporter:
+    profiles: [monitoring]
+    image: oliver006/redis_exporter:v1.55.0
+    container_name: veilborn-redis-exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    ports:
+      - "9121:9121"
+    networks:
+      - monitoring
+    logging: *default-logging
+
+  ###########################################################################
+  # POSTGRES EXPORTER
+  ###########################################################################
+  postgres-exporter:
+    profiles: [monitoring]
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: veilborn-postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://veilborn:devpassword@postgres:5432/veilborn?sslmode=disable"
+    ports:
+      - "9187:9187"
+    networks:
+      - monitoring
+    depends_on:
+      - postgres
+    logging: *default-logging
+
+###############################################################################
+# NETWORKS
+###############################################################################
+networks:
+  monitoring:
+    driver: bridge
+
+###############################################################################
+# VOLUMES
+###############################################################################
+volumes:
+  veilborn-data:
+    driver: local
+  veilborn-logs:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  alertmanager-data:
+    driver: local

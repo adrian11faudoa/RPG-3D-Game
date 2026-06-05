@@ -1,0 +1,39 @@
+# Veilborn — Production Variables
+# Copy to prod.tfvars and fill in your values
+# Run: terraform apply -var-file="prod.tfvars"
+
+environment    = "prod"
+aws_region     = "us-east-1"
+
+# Networking
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24"]
+
+# Game server
+game_port                = 7777
+instance_type            = "c6i.xlarge"    # 4 vCPU, 8 GB RAM
+key_pair_name            = "veilborn-prod" # Create this in EC2 console first
+max_players_per_instance = 64
+world_seed               = 42069
+server_region_name       = "Ironmarch Reaches"
+
+# Auto scaling
+asg_min_size     = 1
+asg_max_size     = 10
+asg_desired_size = 2
+
+# Database
+db_instance_class = "db.r7g.large"  # Production-grade
+
+# Redis
+redis_node_type = "cache.r7g.large"
+
+# Security — restrict to YOUR IP addresses
+admin_cidrs = [
+  "YOUR_IP_HERE/32",  # Replace with your IP: curl ifconfig.me
+]
+
+# DNS (optional — set if you have a Route53 hosted zone)
+hosted_zone_id = ""        # e.g. "Z1234567ABCDEFGH"
+domain_name    = ""        # e.g. "veilborn.io"

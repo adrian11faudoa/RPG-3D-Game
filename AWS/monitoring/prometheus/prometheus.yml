@@ -1,0 +1,94 @@
+###############################################################################
+# Veilborn — Prometheus Configuration
+# Scrapes metrics from all game server instances via EC2 service discovery
+###############################################################################
+
+global:
+  scrape_interval:     30s
+  evaluation_interval: 30s
+  scrape_timeout:      10s
+  external_labels:
+    project:     'veilborn'
+    environment: 'prod'
+
+# ─── Alerting ─────────────────────────────────────────────────────────────────
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+# ─── Alert rules ──────────────────────────────────────────────────────────────
+rule_files:
+  - /etc/prometheus/alerts/*.yml
+
+# ─── Scrape configs ───────────────────────────────────────────────────────────
+scrape_configs:
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Game server instances via EC2 auto-discovery
+  - job_name: 'veilborn-game-servers'
+    scrape_interval: 30s
+    metrics_path: /metrics
+    port: 9090
+    ec2_sd_configs:
+      - region: us-east-1
+        port: 9090
+        filters:
+          - name: tag:Project
+            values: [veilborn]
+          - name: tag:Role
+            values: [game-server]
+          - name: instance-state-name
+            values: [running]
+    relabel_configs:
+      # Use instance ID as the instance label
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance_id
+      # Add AZ label
+      - source_labels: [__meta_ec2_availability_zone]
+        target_label: availability_zone
+      # Add environment tag
+      - source_labels: [__meta_ec2_tag_Environment]
+        target_label: environment
+      # Use private IP for scraping (Prometheus is in same VPC)
+      - source_labels: [__meta_ec2_private_ip]
+        replacement: '$1:9090'
+        target_label: __address__
+
+  # Node exporter (system metrics) — same instances
+  - job_name: 'veilborn-node'
+    scrape_interval: 60s
+    metrics_path: /metrics
+    ec2_sd_configs:
+      - region: us-east-1
+        port: 9100
+        filters:
+          - name: tag:Project
+            values: [veilborn]
+          - name: instance-state-name
+            values: [running]
+    relabel_configs:
+      - source_labels: [__meta_ec2_private_ip]
+        replacement: '$1:9100'
+        target_label: __address__
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance_id
+
+  # RDS via CloudWatch Exporter
+  - job_name: 'veilborn-rds'
+    scrape_interval: 60s
+    static_configs:
+      - targets: ['cloudwatch-exporter:9106']
+    metrics_path: /metrics
+    params:
+      namespace: ['AWS/RDS']
+
+  # Redis / ElastiCache via redis_exporter
+  - job_name: 'veilborn-redis'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['redis-exporter:9121']

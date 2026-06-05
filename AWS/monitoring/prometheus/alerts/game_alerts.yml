@@ -1,0 +1,160 @@
+###############################################################################
+# Veilborn — Prometheus Alert Rules
+###############################################################################
+groups:
+
+  - name: game_server
+    rules:
+
+      # Server completely unreachable
+      - alert: GameServerDown
+        expr: up{job="veilborn-game-servers"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: ops
+        annotations:
+          summary: "Game server instance down"
+          description: "Instance {{ $labels.instance_id }} has been unreachable for 2 minutes."
+          runbook: "https://wiki.veilborn.io/ops/runbooks/server-down"
+
+      # High CPU — risk of lag
+      - alert: GameServerHighCPU
+        expr: |
+          100 - (avg by(instance_id) (rate(node_cpu_seconds_total{mode="idle",job="veilborn-node"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Game server CPU high"
+          description: "Instance {{ $labels.instance_id }} CPU at {{ printf \"%.0f\" $value }}% for 5 minutes."
+
+      # Memory pressure
+      - alert: GameServerHighMemory
+        expr: |
+          (node_memory_MemTotal_bytes{job="veilborn-node"} - node_memory_MemAvailable_bytes{job="veilborn-node"})
+          / node_memory_MemTotal_bytes{job="veilborn-node"} * 100 > 90
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Game server memory critical"
+          description: "Instance {{ $labels.instance_id }} using {{ printf \"%.0f\" $value }}% memory."
+
+      # High player count approaching limit
+      - alert: GameServerNearCapacity
+        expr: veilborn_active_players / veilborn_max_players > 0.85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Game server near player capacity"
+          description: "Instance {{ $labels.instance_id }} at {{ printf \"%.0f\" $value }}% capacity."
+
+      # Tick rate degraded (lag)
+      - alert: GameServerTickRateLow
+        expr: veilborn_server_tick_rate < 15
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Game server tick rate degraded"
+          description: "Instance {{ $labels.instance_id }} tick rate {{ $value }}/s (expected 20/s). Players experiencing lag."
+
+      # High packet loss
+      - alert: GameServerHighPacketLoss
+        expr: veilborn_packet_loss_percent > 5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Game server packet loss high"
+          description: "Instance {{ $labels.instance_id }} packet loss at {{ printf \"%.1f\" $value }}%."
+
+      # Chunk generation queue backed up
+      - alert: ChunkQueueBacklog
+        expr: veilborn_chunk_generation_queue > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Chunk generation backlog"
+          description: "{{ $value }} chunks queued on {{ $labels.instance_id }}. World loading may be slow."
+
+  - name: database
+    rules:
+
+      # RDS connections near limit
+      - alert: DatabaseConnectionsHigh
+        expr: |
+          aws_rds_database_connections_average > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RDS connection count high"
+          description: "RDS has {{ $value }} connections. Check for connection leaks."
+
+      # RDS CPU spike
+      - alert: DatabaseCPUHigh
+        expr: aws_rds_cpuutilization_average > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RDS CPU high"
+          description: "RDS CPU at {{ printf \"%.0f\" $value }}%. Consider read replicas."
+
+      # RDS free storage low
+      - alert: DatabaseLowStorage
+        expr: aws_rds_free_storage_space_average < 5368709120  # 5 GB
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RDS storage almost full"
+          description: "RDS has only {{ humanize $value }} free storage remaining."
+
+  - name: redis
+    rules:
+
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis instance is unreachable. Sessions and pub/sub will fail."
+
+      - alert: RedisHighMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory high"
+          description: "Redis using {{ printf \"%.0f\" $value }}% of max memory. Evictions may start."
+
+  - name: infrastructure
+    rules:
+
+      # S3 sync failures
+      - alert: ChunkSyncFailing
+        expr: veilborn_s3_sync_errors_total > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "S3 chunk sync errors"
+          description: "{{ $value }} chunk sync errors. World persistence may be compromised."
+
+      # NLB unhealthy targets
+      - alert: NLBUnhealthyTargets
+        expr: aws_applicationelb_unhealthy_host_count_average > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "NLB unhealthy targets"
+          description: "{{ $value }} game server targets failing NLB health checks."
